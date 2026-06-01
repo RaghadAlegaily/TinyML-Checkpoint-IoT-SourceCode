@@ -23,7 +23,7 @@
 #define LOG_LEVEL  LOG_LEVEL_INFO
 
 /*---------------------------------------------------------------------------*/
-/* إعدادات الشبكة                                                            */
+/* Network settings                                                          */
 /*---------------------------------------------------------------------------*/
 #define UDP_CLIENT_PORT   8765
 #define UDP_SERVER_PORT   5678
@@ -34,7 +34,7 @@
 
 
 /*---------------------------------------------------------------------------*/
-/* نموذج الطاقة                                                              */
+/* Energy model                                                              */
 /*---------------------------------------------------------------------------*/
 #define ENERGY_MIN_BOOT      20
 #define ENERGY_MAX_BOOT      80
@@ -47,7 +47,7 @@
 #define ENERGY_COST_RPL       3
 
 /*---------------------------------------------------------------------------*/
-/* المتغيرات العامة                                                          */
+/* Global variables                                                          */
 /*---------------------------------------------------------------------------*/
 static struct simple_udp_connection udp_conn;
 static uint8_t  energy = 0;
@@ -152,28 +152,28 @@ PROCESS_THREAD(udp_client_process, ev, data)
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
 
-    /* 1. استهلاك idle */
+    /* 1. Idle energy consumption */
     consume_energy(ENERGY_COST_IDLE);
     check_failure();
 
     if(NETSTACK_ROUTING.node_is_reachable() &&
        NETSTACK_ROUTING.get_root_ipaddr(&dest_ipaddr)) {
 
-      /* ✅ FIX: إعادة ضبط العداد عند الاتصال */
+      /* ✅ FIX: Reset counter on connection */
 
-      /* 2. قراءة الحساسات */
+      /* 2. Read sensors */
       lps331ap_read_temp(&temp_raw);
       temp  = 42.5f + ((float)temp_raw / 480.0f);
       light = isl29020_read_sample();
       consume_energy(ENERGY_COST_SENSOR);
       check_failure();
 
-      /* 3. سجّل BEMS */
+      /* 3. BEMS log */
       LOG_INFO("BEMS | Temperature: %.1f C | "
                "Light: %.1f lux | seq: %lu\n",
                temp, light, (unsigned long)seq_id);
 
-      /* 4. أرسل للسيرفر */
+      /* 4. Send to server */
       snprintf(payload, sizeof(payload),
                "BEMS | Temperature: %.1f C | "
                "Light: %.1f lux | seq: %lu",
@@ -182,7 +182,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
                         strlen(payload), &dest_ipaddr);
       seq_id++;
 
-      /* 5. استهلاك الإرسال */
+      /* 5. Transmission energy consumption */
       uint8_t tx_cost = ENERGY_COST_TX_MIN +
                         (random_rand() % (ENERGY_COST_TX_MAX -
                                           ENERGY_COST_TX_MIN + 1));
@@ -195,7 +195,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
     LOG_INFO("Not reachable yet\n");
     }
 
-    /* 6. حصاد في نهاية كل دورة */
+    /* 6. Harvest at the end of each cycle */
     energy_harvest();
     LOG_INFO("ENERGY | level:%u\n", energy);
     check_failure();
