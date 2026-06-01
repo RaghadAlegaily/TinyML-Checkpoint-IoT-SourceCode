@@ -1,0 +1,2 @@
+# Raghad-alegaily
+Implementation of TinyML with Checkpoint on Intermittently Powered IoT Devices using Contiki-NG on FIT IoT-LAB testbed. The project simulates intermittent node behavior in RPL-based wireless sensor networks, evaluating network performance metrics including Packet Delivery Ratio (PDR) and latency under realistic power failure conditions.
