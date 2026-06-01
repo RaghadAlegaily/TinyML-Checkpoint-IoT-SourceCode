@@ -4,18 +4,18 @@
  * Smart Building Energy Management System (BEMS)
  * FIT IoT-LAB — ARM Cortex-M3 — Contiki-NG
  *
- * نفس كود الـ intermittent + Checkpoint + ML
+ * Same intermittent code + Checkpoint + ML
  */
 
 #include "contiki.h"
 #include "sys/etimer.h"
 #include "dev/watchdog.h"
-#include "dev/xmem.h"       /* ✅ إضافة: NOR Flash */
+#include "dev/xmem.h"       /*  Addition: NOR Flash */
 #include "lib/random.h"
 #include "net/routing/routing.h"
 #include "net/netstack.h"
 #include "net/ipv6/simple-udp.h"
-#include "models.h"         /* ✅ إضافة: ML model */
+#include "models.h"         /*  Addition: ML model */
 #include "periph/lps331ap.h"
 #include "periph/isl29020.h"
 #include "sys/log.h"
@@ -25,7 +25,7 @@
 #define LOG_LEVEL  LOG_LEVEL_INFO
 
 /*---------------------------------------------------------------------------*/
-/* إعدادات الشبكة — نفس الأصل                                               */
+/* Network settings — same as original                                       */
 /*---------------------------------------------------------------------------*/
 #define UDP_CLIENT_PORT      8765
 #define UDP_SERVER_PORT      5678
@@ -35,7 +35,7 @@
 #define RPL_SETTLE_TIME      (60  * CLOCK_SECOND)
 
 /*---------------------------------------------------------------------------*/
-/* نموذج الطاقة — نفس الأصل                                                  */
+/* Energy model — same as original                                           */
 /*---------------------------------------------------------------------------*/
 #define ENERGY_MIN_BOOT      20
 #define ENERGY_MAX_BOOT      80
@@ -44,14 +44,14 @@
 #define ENERGY_COST_SENSOR    1
 #define ENERGY_COST_TX_MIN    3
 #define ENERGY_COST_TX_MAX    8
-#define ENERGY_HARVEST_PROB  38   /* FIX 3: كان 38، صحيح = 85 */
+#define ENERGY_HARVEST_PROB  38   /* FIX 3: was 38, correct = 85 */
 #define ENERGY_COST_RPL       3
 #define ENERGY_COST_ML         1
 #define ENERGY_COST_CHECKPOINT 5
 #define ENERGY_COST_RESTORE    2
 
 /*---------------------------------------------------------------------------*/
-/* ✅ إضافة: Checkpoint                                                       */
+/* ✅ Addition: Checkpoint                                                    */
 /*---------------------------------------------------------------------------*/
 #define CHECKPOINT_MAGIC  0xABCD1234
 #define CHECKPOINT_ADDR   0x00000000
@@ -63,7 +63,7 @@ typedef struct {
 } ckpt_data_t;
 
 /*---------------------------------------------------------------------------*/
-/* المتغيرات — نفس الأصل + إضافات                                           */
+/* Variables — same as original + additions                                  */
 /*---------------------------------------------------------------------------*/
 static struct simple_udp_connection udp_conn;
 static uint8_t  energy   = 0;
@@ -279,7 +279,7 @@ PROCESS_THREAD(udp_client_process, ev, data)
       temp  = 42.5f + ((float)temp_raw / 480.0f);
       light = isl29020_read_sample();
       consume_energy(ENERGY_COST_SENSOR);
-      check_failure();   /* FIX 2: مفقود في الأصل */
+      check_failure();   /* FIX 2: missing in original */
 
       last_temp  = temp;
       last_light = light;
@@ -311,9 +311,9 @@ PROCESS_THREAD(udp_client_process, ev, data)
 
       LOG_INFO("Not reachable yet \n");
 
-    }  /* FIX 1: إغلاق else هنا — energy_harvest خارج if/else */
+    }  /* FIX 1: closing else here — energy_harvest is outside if/else */
 
-    /* هذا يعمل دائماً سواء أرسل أو لم يرسل */
+    /* This always runs whether a packet was sent or not */
     energy_harvest();
     LOG_INFO("ENERGY | level:%u\n", energy);
     check_failure();
